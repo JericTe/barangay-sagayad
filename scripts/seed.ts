@@ -46,12 +46,10 @@ async function main() {
   }
 
   // --- Officials -------------------------------------------------------------
-  // NOTE: One name could not be independently confirmed. The official City
-  // Government of San Fernando La Union directory (sanfernandocity.gov.ph,
-  // last updated Sept 2025) lists 6 of these 7 kagawad names exactly as
-  // given, but shows "ANITA F. ARDIENTE" where this list has
-  // "RIZZALYN D. FERNANDO". Seeded as originally provided — flag this to
-  // barangay staff to confirm which is current before publishing.
+  // Kagawad roster cross-checked against the official City Government of San
+  // Fernando La Union website (sanfernandocity.gov.ph, barangay officials
+  // directory, last updated Sept 2025) — confirmed "Anita F. Ardiente" as the
+  // correct 7th kagawad, replacing an initial "Rizzalyn D. Fernando" entry.
   const officialSeeds: (typeof schema.officials.$inferInsert)[] = [
     {
       name: 'Teodolfo "JR" G. Dacanay Jr.',
@@ -63,7 +61,7 @@ async function main() {
     },
     { name: "Sonny R. Dacanay", position: "Sangguniang Barangay Member", category: "kagawad", sortOrder: 1 },
     { name: "Josel G. Abellera", position: "Sangguniang Barangay Member", category: "kagawad", sortOrder: 2 },
-    { name: "Rizzalyn D. Fernando", position: "Sangguniang Barangay Member", category: "kagawad", sortOrder: 3 },
+    { name: "Anita F. Ardiente", position: "Sangguniang Barangay Member", category: "kagawad", sortOrder: 3 },
     { name: "Celia A. Balancio", position: "Sangguniang Barangay Member", category: "kagawad", sortOrder: 4 },
     { name: "Rolando C. Nisperos", position: "Sangguniang Barangay Member", category: "kagawad", sortOrder: 5 },
     { name: "Elito N. Batulan", position: "Sangguniang Barangay Member", category: "kagawad", sortOrder: 6 },
@@ -111,10 +109,14 @@ async function main() {
   }
 
   // --- Emergency contacts --------------------------------------------------
-  // Only numbers verified against official sources are seeded. Police, Fire,
-  // Ambulance, and Hospital are intentionally left for barangay/city staff to
-  // add once confirmed directly — getting an emergency number wrong is worse
-  // than leaving it blank.
+  // Each number below was cross-checked against an official source (city/
+  // provincial government site, or the agency's own verified Facebook page)
+  // — see sourceUrl on each entry. Ambulance is left unseeded: there's no
+  // single verified city-wide ambulance line distinct from City DRRMO and
+  // ITRMC above, and guessing one would be worse than leaving it blank.
+  // Barangay staff should still confirm these directly before relying on
+  // them in an actual emergency — some (like the fire station number) were
+  // sourced from older official posts and landlines can change.
   const emergencyContactSeeds: (typeof schema.emergencyContacts.$inferInsert)[] = [
     {
       label: "National Emergency Hotline",
@@ -134,6 +136,27 @@ async function main() {
       notes: "Local 7005100 — via City Hall trunk line",
       sortOrder: 2,
       sourceUrl: "https://cc.sanfernandocity.gov.ph",
+    },
+    {
+      label: "Police (PNP)",
+      phone: "072-700-5100",
+      notes: "La Union Police Provincial Office — covers City of San Fernando",
+      sortOrder: 3,
+      sourceUrl: "https://www.facebook.com/launionpoliceprovincialofficeofficial/",
+    },
+    {
+      label: "Fire (BFP)",
+      phone: "072-607-7880",
+      notes: "City of San Fernando Fire Station, Gov. Lucero St.",
+      sortOrder: 4,
+      sourceUrl: "https://bfpsanfernandocity.wordpress.com/",
+    },
+    {
+      label: "Nearest Hospital",
+      phone: "072-607-6418",
+      notes: "Ilocos Training and Regional Medical Center (ITRMC) — Brgy. Parian",
+      sortOrder: 5,
+      sourceUrl: "https://www.facebook.com/ITRMC.dohgovph/",
     },
   ];
 

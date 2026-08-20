@@ -13,6 +13,8 @@ export const metadata: Metadata = {
 
 // Shown only when barangay staff haven't added a contact for this role yet —
 // never a substitute for verified numbers, just a reminder of what's missing.
+// Only "Ambulance" is expected to actually show here after seeding — see
+// scripts/seed.ts for why it's left unseeded.
 const EXPECTED_ROLES = ["Police (PNP)", "Fire (BFP)", "Ambulance", "Nearest Hospital"];
 
 export default async function EmergencyPage() {

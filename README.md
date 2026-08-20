@@ -3,21 +3,26 @@
 Official digital platform for Barangay Sagayad, City of San Fernando, La Union,
 Philippines. Built as a real, working system — not a static template.
 
-## ⚠️ Before you publish anything: one data discrepancy to resolve
+## Officials & emergency data — verification notes
 
-While seeding official information, I cross-checked the provided roster against
-the **City Government of San Fernando La Union's own official website**
-(barangay officials directory, last updated September 2025). The Punong
-Barangay and 6 of 7 Kagawad match exactly. One name doesn't:
+**Officials roster**: cross-checked against the official City Government of
+San Fernando La Union website (barangay officials directory, last updated
+September 2025). The 7th kagawad seed was corrected from an initial
+"Rizzalyn D. Fernando" to **Anita F. Ardiente** to match. The SK Chairman
+name (Jurey M. Manuel) could not be independently verified against any
+authoritative source and is seeded as originally provided — worth a
+double-check with barangay staff.
 
-| This project seeds | City government's site currently shows |
-|---|---|
-| Rizzalyn D. Fernando | **Anita F. Ardiente** |
-
-Please confirm which is current before the site goes live — it's a five-minute
-fix in **Admin → Officials** either way, but it shouldn't ship wrong. The SK
-Chairman name (Jurey M. Manuel) could not be independently verified against
-any authoritative source and is seeded as originally provided.
+**Emergency contacts**: each seeded number is cross-checked against an
+official source (see `sourceUrl` on each entry in `scripts/seed.ts`) —
+National Hotline (911), Provincial DRRMO, City DRRMO, Police (La Union PPO),
+Fire (City of San Fernando Fire Station), and the regional hospital (ITRMC).
+**Ambulance** is left unseeded — there's no single verified city-wide
+ambulance line distinct from the DRRMO/hospital numbers already listed, and
+guessing one would be worse than leaving it blank. A couple of these (fire
+station in particular) were sourced from older official posts; landlines are
+usually stable but barangay/city staff should confirm before relying on them
+in a real emergency.
 
 ## Tech stack
 
@@ -59,12 +64,12 @@ naturally with Neon's serverless driver.
 
 ## What's intentionally a placeholder
 
-Puroks, most emergency contacts (Police/Fire/Ambulance/Hospital), school
-data, health/BHW/midwife schedules, and fees/requirements per document type
-are all empty or "To be updated" — the brief explicitly said not to invent
-this, so it's real, editable, empty state rather than fabricated content.
-Health, Education, Senior Citizen, and Youth sections are honest "coming
-soon" pages (Phase 2/3) rather than dead links.
+Puroks, the Ambulance emergency contact, school data, health/BHW/midwife
+schedules, and fees/requirements per document type are all empty or "To be
+updated" — the brief explicitly said not to invent this, so it's real,
+editable, empty state rather than fabricated content. Health, Education,
+Senior Citizen, and Youth sections are honest "coming soon" pages (Phase 2/3)
+rather than dead links.
 
 ## Local development
 
