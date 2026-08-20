@@ -1,0 +1,15 @@
+export const REPORT_CATEGORIES = [
+  "Broken streetlights",
+  "Damaged roads",
+  "Drainage problems",
+  "Flooding",
+  "Garbage / illegal dumping",
+  "Water problems",
+  "Stray animals",
+  "Noise complaints",
+  "Public safety",
+  "Environmental concerns",
+  "Blocked roads",
+  "Fallen trees",
+  "Other",
+];

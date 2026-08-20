@@ -1,0 +1,134 @@
+# Barangay Sagayad — Digital Barangay Hall
+
+Official digital platform for Barangay Sagayad, City of San Fernando, La Union,
+Philippines. Built as a real, working system — not a static template.
+
+## ⚠️ Before you publish anything: one data discrepancy to resolve
+
+While seeding official information, I cross-checked the provided roster against
+the **City Government of San Fernando La Union's own official website**
+(barangay officials directory, last updated September 2025). The Punong
+Barangay and 6 of 7 Kagawad match exactly. One name doesn't:
+
+| This project seeds | City government's site currently shows |
+|---|---|
+| Rizzalyn D. Fernando | **Anita F. Ardiente** |
+
+Please confirm which is current before the site goes live — it's a five-minute
+fix in **Admin → Officials** either way, but it shouldn't ship wrong. The SK
+Chairman name (Jurey M. Manuel) could not be independently verified against
+any authoritative source and is seeded as originally provided.
+
+## Tech stack
+
+- **Next.js 16** (App Router, TypeScript, Turbopack)
+- **Tailwind CSS v4** — custom civic design system (see `src/app/globals.css`)
+- **Drizzle ORM** + **Neon Postgres** (serverless HTTP driver — no connection
+  pooling to manage, works natively in Vercel's serverless functions)
+- **Self-hosted fonts** (Sora + Public Sans, both open-source/OFL) — no
+  runtime dependency on Google's font servers, which matters on slower
+  provincial connections
+- Auth: hand-rolled credentials + bcrypt + signed JWT session cookie (no
+  external auth service required)
+
+**Why Drizzle instead of Prisma**, since the original brief suggested Prisma:
+Prisma's CLI downloads a Rust query-engine binary from its own CDN at
+`generate`/`migrate` time. That domain was unreachable from the sandbox this
+was built in, so it would have blocked development entirely. Drizzle is pure
+TypeScript and talks to Postgres over HTTP — no binary, no build-time network
+dependency, and it's a well-regarded, actively maintained ORM that pairs
+naturally with Neon's serverless driver.
+
+## What's built (Phase 1, working end-to-end)
+
+- Homepage, Officials, Announcements (list + detail), Services directory,
+  Puroks directory, Contact, Emergency Center
+- **Document requests**: public form → generates tracking numbers
+  (`SAG-2026-000000`) → public status-tracking page
+- **Problem reports**: public form (13 categories from the brief) → reference
+  numbers (`SGY-000000`) → public status-tracking page
+- Admin dashboard: login, live overview counts, and management screens for
+  Announcements, Document Requests (status + notes), Reports (status),
+  Officials, Services, Emergency Contacts, and Site Settings
+- Everything editable from the admin — no hard-coded contact info, fees, or
+  content anywhere on the public site
+- Accessibility: text-size toggle (A+/A−, persisted), large tap targets,
+  visible focus states, `prefers-reduced-motion` support, tap-to-call phone
+  links throughout
+- SEO: metadata, Open Graph, sitemap.xml, robots.txt
+
+## What's intentionally a placeholder
+
+Puroks, most emergency contacts (Police/Fire/Ambulance/Hospital), school
+data, health/BHW/midwife schedules, and fees/requirements per document type
+are all empty or "To be updated" — the brief explicitly said not to invent
+this, so it's real, editable, empty state rather than fabricated content.
+Health, Education, Senior Citizen, and Youth sections are honest "coming
+soon" pages (Phase 2/3) rather than dead links.
+
+## Local development
+
+```bash
+npm install
+cp .env.example .env.local   # fill in DATABASE_URL and AUTH_SECRET (see below)
+npm run db:generate          # already run once — only needed again after schema changes
+npm run db:push              # creates the tables in your database
+npm run db:seed              # seeds officials, site settings, services, verified emergency contacts
+npm run dev
+```
+
+Visit `http://localhost:3000`. Sign in to `/admin/login` with the
+`SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` you set before seeding.
+
+## Environment variables
+
+See `.env.example` for the full list with explanations. In short:
+
+| Variable | Required | Notes |
+|---|---|---|
+| `DATABASE_URL` | Yes | Postgres connection string (Neon recommended — free, no card) |
+| `AUTH_SECRET` | Yes | `openssl rand -base64 32` |
+| `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | Only for `db:seed` | Creates your first admin login |
+| `NEXT_PUBLIC_SITE_URL` | Recommended | Used in SEO metadata |
+
+## Deploying — entirely free
+
+1. **Push this repo to GitHub** (already done if you're reading this there).
+2. **Vercel** → New Project → Import the GitHub repo → Deploy. Free Hobby
+   plan, no credit card.
+3. In the Vercel project, open the **Storage** tab → **Neon Postgres** →
+   Create → Connect. This automatically sets `DATABASE_URL` for you.
+4. In **Settings → Environment Variables**, add `AUTH_SECRET` and
+   `NEXT_PUBLIC_SITE_URL` (your `*.vercel.app` URL, or custom domain).
+5. Redeploy. Then run the seed script once, pointed at production:
+   ```bash
+   DATABASE_URL="<your neon url>" SEED_ADMIN_EMAIL=you@example.com SEED_ADMIN_PASSWORD="choose one" npm run db:seed
+   ```
+6. Sign in at `yoursite.vercel.app/admin/login` and start filling in the
+   placeholders — starting with that officials discrepancy above.
+
+## Project structure
+
+```
+src/
+  app/                    Routes (App Router) — public pages + /admin
+  components/
+    layout/                Header, Footer, EmergencyBanner, TextSizeToggle
+    home/                   Homepage sections
+    ui/                     Design-system primitives (Button, Card, Badge, ...)
+  lib/
+    db/schema.ts            Drizzle schema — source of truth for the database
+    data.ts                 Public-facing data-fetching (fails soft to defaults)
+    auth.ts                 Session/password helpers
+    actions/                Server Actions (forms write here)
+scripts/seed.ts             Idempotent seed script — verified data only
+drizzle/                    Generated SQL migrations
+```
+
+## Roadmap (Phases 2–5, from the original brief)
+
+Health & BHW/midwife schedules, School directory, Purok admin CRUD, Senior/
+PWD/Solo Parent/Youth sections, Business Directory, Jobs board, Community
+Calendar, full Transparency/Budget/Projects module, Document Library, Barangay
+Assembly, Resident accounts, Polls, Interactive + disaster maps, SMS/email
+notifications, QR document verification, analytics.

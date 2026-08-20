@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+/*
+  Barangay Sagayad design tokens.
+
+  Direction: a coastal La Union civic identity — a deep, trustworthy blue
+  (the color Filipino LGUs reach for because it reads as government-serious
+  without being cold), a harvest-gold accent drawn from rice fields and
+  fiesta bunting, and a sea-teal for health/positive states that nods to
+  San Fernando's coastline. Warm paper background instead of pure white or
+  the ubiquitous AI-generated cream. Two typefaces doing distinct jobs:
+  Sora for display (confident, geometric, a little warmth in the curves)
+  and Public Sans for everything read at length — it's the typeface built
+  for government digital services, which is exactly the job here.
+*/
+
+:root {
+  --color-ink: #16242c;
+  --color-ink-soft: #3f5561;
+  --color-paper: #faf9f6;
+  --color-paper-raised: #ffffff;
+
+  --color-brand-900: #0f3a52;
+  --color-brand-700: #14567a;
+  --color-brand-500: #1c6e8c;
+  --color-brand-100: #e4eef2;
+
+  --color-gold-600: #c6862a;
+  --color-gold-500: #e1a33b;
+  --color-gold-100: #fbeed2;
+
+  --color-teal-600: #2f7d72;
+  --color-teal-500: #3e9c8f;
+  --color-teal-100: #dcf0ec;
+
+  --color-red-700: #9c2a24;
+  --color-red-600: #c1352e;
+  --color-red-100: #fbe2e0;
+
+  --color-line: #e4dfd4;
+
+  --font-display: var(--font-sora);
+  --font-body: var(--font-public-sans);
+}
+
+@theme inline {
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-paper: var(--color-paper);
+  --color-paper-raised: var(--color-paper-raised);
+
+  --color-brand-900: var(--color-brand-900);
+  --color-brand-700: var(--color-brand-700);
+  --color-brand-500: var(--color-brand-500);
+  --color-brand-100: var(--color-brand-100);
+
+  --color-gold-600: var(--color-gold-600);
+  --color-gold-500: var(--color-gold-500);
+  --color-gold-100: var(--color-gold-100);
+
+  --color-teal-600: var(--color-teal-600);
+  --color-teal-500: var(--color-teal-500);
+  --color-teal-100: var(--color-teal-100);
+
+  --color-red-700: var(--color-red-700);
+  --color-red-600: var(--color-red-600);
+  --color-red-100: var(--color-red-100);
+
+  --color-line: var(--color-line);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 1.0625rem; /* 17px baseline — a little larger than default for easier reading */
+  line-height: 1.6;
+}
+
+/* Text-size toggle (see TextSizeToggle.tsx) — scales all rem-based sizing. */
+html[data-text-size="large"] {
+  font-size: 112.5%;
+}
+html[data-text-size="xlarge"] {
+  font-size: 125%;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+}
+
+/* Visible keyboard focus everywhere — accessibility floor, not optional. */
+:focus-visible {
+  outline: 3px solid var(--color-gold-500);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
