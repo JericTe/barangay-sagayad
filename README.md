@@ -105,12 +105,16 @@ See `.env.example` for the full list with explanations. In short:
    Create → Connect. This automatically sets `DATABASE_URL` for you.
 4. In **Settings → Environment Variables**, add `AUTH_SECRET` and
    `NEXT_PUBLIC_SITE_URL` (your `*.vercel.app` URL, or custom domain).
-5. Redeploy. Then run the seed script once, pointed at production:
-   ```bash
-   DATABASE_URL="<your neon url>" SEED_ADMIN_EMAIL=you@example.com SEED_ADMIN_PASSWORD="choose one" npm run db:seed
-   ```
+5. Redeploy. Then set it up — **no terminal needed**: visit
+   `yoursite.vercel.app/setup`, enter the `SETUP_TOKEN` value you just set and
+   your chosen admin email/password, and click Run Setup. It loads officials,
+   services, and emergency contacts, and creates your admin login, all from
+   the browser. (A CLI alternative — `npm run db:seed` — still exists if you
+   have Node.js and prefer that.)
 6. Sign in at `yoursite.vercel.app/admin/login` and start filling in the
-   placeholders — starting with that officials discrepancy above.
+   placeholders — starting with that officials discrepancy above. Then
+   remove the `SETUP_TOKEN` environment variable so `/setup` can't be run
+   again by anyone else.
 
 ## Project structure
 
