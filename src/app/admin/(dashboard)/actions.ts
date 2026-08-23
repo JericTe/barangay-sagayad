@@ -147,6 +147,26 @@ export async function createOfficial(
   return { success: true };
 }
 
+export async function deleteOfficial(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const id = formData.get("id")?.toString();
+  if (!id) return { error: "Missing official id." };
+
+  try {
+    const db = getDb();
+    await db.delete(officials).where(eq(officials.id, id));
+  } catch {
+    return { error: "Couldn't delete — the database isn't connected." };
+  }
+
+  revalidatePath("/officials");
+  revalidatePath("/admin/officials");
+  revalidatePath("/");
+  return { success: true };
+}
+
 export async function createEmergencyContact(
   _prevState: ActionState,
   formData: FormData

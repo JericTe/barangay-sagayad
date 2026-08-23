@@ -35,6 +35,7 @@ export async function seedDatabase(
       municipality: "City of San Fernando",
       province: "La Union",
       region: "Region I",
+      address: "Barangay Hall Sagayad, San Fernando City, La Union, Philippines 2500",
       email: "theo.dacanay@gmail.com",
       facebookUrl: "https://www.facebook.com/LGUSAGAYAD",
       captainFacebookUrl: "https://www.facebook.com/KapTheoDacanay",
@@ -77,6 +78,41 @@ export async function seedDatabase(
     log.push(`Officials added (${officialsToInsert.length})`);
   } else {
     log.push("Officials already present, skipped");
+  }
+
+  // --- Pages (CMS content blocks) -------------------------------------------
+  // Draft only — written to fill the homepage section, not verified as the
+  // Punong Barangay's actual words. Meant to be reviewed and edited by him
+  // (or barangay staff) via Admin before treating it as final. Kept
+  // deliberately generic: no specific policy claims, achievements, or
+  // initiatives that haven't been confirmed.
+  const pageSeeds: (typeof schema.pages.$inferInsert)[] = [
+    {
+      slug: "captains-message",
+      title: "Message from the Punong Barangay",
+      content:
+        'Mahal kong mga kababayan ng Barangay Sagayad,\n\n' +
+        'Malugod ko kayong tinatanggap sa aming bagong digital na serbisyo — isang bagong ' +
+        'paraan upang mas madali ninyong maabot ang mga serbisyo, impormasyon, at anunsyo ng ' +
+        'ating barangay, saan man kayo naroroon.\n\n' +
+        'Layunin nating gawing mas mabilis at mas malinaw ang mga proseso — mula sa pagkuha ng ' +
+        'dokumento, pag-uulat ng problema, hanggang sa pananatiling updated sa mga proyekto at ' +
+        'gawain ng ating barangay. Ito ay bahagi ng aming patuloy na pagsisikap na maging bukas, ' +
+        'mapagkakatiwalaan, at mas malapit sa bawat Sagayadeño.\n\n' +
+        'Maraming salamat sa inyong tiwala at patuloy na suporta.\n\n' +
+        'Maglingkod nang buong puso,',
+    },
+  ];
+
+  const currentPages = await db.select({ slug: schema.pages.slug }).from(schema.pages);
+  const existingPageSlugs = new Set(currentPages.map((p) => p.slug));
+  const pagesToInsert = pageSeeds.filter((p) => !existingPageSlugs.has(p.slug));
+
+  if (pagesToInsert.length > 0) {
+    await db.insert(schema.pages).values(pagesToInsert);
+    log.push(`Pages added (${pagesToInsert.length}) — including a DRAFT captain's message for review`);
+  } else {
+    log.push("Pages already present, skipped");
   }
 
   // --- Services (document types) -------------------------------------------

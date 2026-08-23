@@ -3,6 +3,7 @@ import { Mail, MapPin, Clock, Phone } from "lucide-react";
 import { FacebookIcon } from "@/components/ui/FacebookIcon";
 import { Container, SectionHeading, Card, ToBeUpdated } from "@/components/ui/primitives";
 import { PhoneLink } from "@/components/ui/PhoneLink";
+import { MapEmbed } from "@/components/ui/MapEmbed";
 import { getSiteSettings } from "@/lib/data";
 import { ContactForm } from "./ContactForm";
 
@@ -42,6 +43,12 @@ export default async function ContactPage() {
               </InfoRow>
             </dl>
           </Card>
+
+          {settings.address ? (
+            <Card className="overflow-hidden p-0">
+              <MapEmbed address={settings.address} className="h-64 w-full sm:h-72" />
+            </Card>
+          ) : null}
 
           <Card>
             <p className="font-bold text-brand-900">Follow Barangay Sagayad</p>

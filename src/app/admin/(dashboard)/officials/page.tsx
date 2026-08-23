@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db";
 import { officials } from "@/lib/db/schema";
 import { Card, Badge } from "@/components/ui/primitives";
 import { OfficialForm } from "./OfficialForm";
+import { DeleteOfficialButton } from "./DeleteOfficialButton";
 
 async function listOfficials() {
   try {
@@ -40,7 +41,10 @@ export default async function AdminOfficialsPage() {
                 <p className="font-bold text-brand-900">{o.name}</p>
                 <p className="text-sm text-ink-soft">{o.position}</p>
               </div>
-              <Badge tone="brand">{o.category.replace(/_/g, " ")}</Badge>
+              <div className="flex items-center gap-2">
+                <Badge tone="brand">{o.category.replace(/_/g, " ")}</Badge>
+                <DeleteOfficialButton id={o.id} name={o.name} />
+              </div>
             </Card>
           ))
         )}
