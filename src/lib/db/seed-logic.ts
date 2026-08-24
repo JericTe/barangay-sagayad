@@ -1,4 +1,5 @@
 import type { NeonHttpDatabase } from "drizzle-orm/neon-http";
+import { eq } from "drizzle-orm";
 import * as schema from "./schema";
 import { hashPassword } from "../auth";
 
@@ -139,51 +140,104 @@ export async function seedDatabase(
   }
 
   // --- Emergency contacts --------------------------------------------------
+  // This batch (Police, Fire, DRRM, Health Office, LUECO, and all four
+  // hospitals) was provided directly by barangay staff from a locally
+  // circulated reference sheet — not independently web-verified by me, same
+  // trust level as the address and officials roster. Multiple numbers per
+  // entry are stored comma-separated; the Emergency page renders each as
+  // its own tap-to-call button.
+  //
+  // Unlike officials/services (insert-once), this list is upserted by label
+  // every time setup runs, so pushing a corrected number and re-running
+  // setup actually takes effect — there's no admin edit UI for these yet.
   const emergencyContactSeeds: (typeof schema.emergencyContacts.$inferInsert)[] = [
     { label: "National Emergency Hotline", phone: "911", sortOrder: 0, sourceUrl: "https://www.ndrrmc.gov.ph" },
     { label: "Provincial DRRMO (La Union)", phone: "0998-561-1519", sortOrder: 1, sourceUrl: "https://launion.gov.ph" },
     {
       label: "City DRRMO (San Fernando City)",
+      phone: "0928-522-0622, 0928-193-7818, 0917-676-7673",
       email: "citydrrmosanfernando@gmail.com",
-      notes: "Local 7005100 — via City Hall trunk line",
       sortOrder: 2,
-      sourceUrl: "https://cc.sanfernandocity.gov.ph",
+      sourceUrl: null,
     },
     {
       label: "Police (PNP)",
-      phone: "072-700-5100",
-      notes: "La Union Police Provincial Office — covers City of San Fernando",
+      phone: "0915-558-8888, 0939-813-6888, (072) 607-8954",
+      notes: "San Fernando City Police Station",
       sortOrder: 3,
-      sourceUrl: "https://www.facebook.com/launionpoliceprovincialofficeofficial/",
+      sourceUrl: null,
     },
     {
       label: "Fire (BFP)",
-      phone: "072-607-7880",
-      notes: "City of San Fernando Fire Station, Gov. Lucero St.",
+      phone: "0917-183-8711",
+      notes: "City of San Fernando Fire Station",
       sortOrder: 4,
-      sourceUrl: "https://bfpsanfernandocity.wordpress.com/",
+      sourceUrl: null,
     },
     {
-      label: "Nearest Hospital",
-      phone: "072-607-6418",
-      notes: "Ilocos Training and Regional Medical Center (ITRMC) — Brgy. Parian",
+      label: "Health Office",
+      phone: "(072) 888-6915, (072) 682-2883, 0928-391-5872",
+      notes: "City Health Office, non-emergency health coordination",
       sortOrder: 5,
-      sourceUrl: "https://www.facebook.com/ITRMC.dohgovph/",
+      sourceUrl: null,
+    },
+    {
+      label: "LUECO (Power Outage / Downed Lines)",
+      phone: "(072) 607-4790, (072) 607-3890, 0922-863-5745",
+      notes: "La Union Electric Cooperative",
+      sortOrder: 6,
+      sourceUrl: null,
+    },
+    {
+      label: "ITRMC",
+      phone: "0910-563-5520, 0915-855-4459, (072) 607-2418, (072) 607-6422",
+      notes: "Ilocos Training and Regional Medical Center — loc. 014-015",
+      sortOrder: 7,
+      sourceUrl: null,
+    },
+    {
+      label: "Bethany Hospital",
+      phone: "0917-518-0880, (072) 242-0804, (072) 888-2930",
+      sortOrder: 8,
+      sourceUrl: null,
+    },
+    {
+      label: "Lorma Medical Center",
+      phone: "0917-593-1390, (072) 888-2617, 0917-583-3069",
+      sortOrder: 9,
+      sourceUrl: null,
+    },
+    {
+      label: "Lumed",
+      phone: "0933-865-6503, (072) 607-8339, 0930-492-8341",
+      sortOrder: 10,
+      sourceUrl: null,
     },
   ];
 
   const currentContacts = await db
-    .select({ label: schema.emergencyContacts.label })
+    .select({ id: schema.emergencyContacts.id, label: schema.emergencyContacts.label })
     .from(schema.emergencyContacts);
-  const existingContactLabels = new Set(currentContacts.map((c) => c.label));
-  const contactsToInsert = emergencyContactSeeds.filter((c) => !existingContactLabels.has(c.label));
+  const contactIdByLabel = new Map(currentContacts.map((c) => [c.label, c.id]));
 
-  if (contactsToInsert.length > 0) {
-    await db.insert(schema.emergencyContacts).values(contactsToInsert);
-    log.push(`Emergency contacts added (${contactsToInsert.length})`);
-  } else {
-    log.push("Emergency contacts already present, skipped");
+  let contactsAdded = 0;
+  let contactsUpdated = 0;
+
+  for (const seed of emergencyContactSeeds) {
+    const existingId = contactIdByLabel.get(seed.label);
+    if (existingId) {
+      await db
+        .update(schema.emergencyContacts)
+        .set({ ...seed, updatedAt: new Date() })
+        .where(eq(schema.emergencyContacts.id, existingId));
+      contactsUpdated++;
+    } else {
+      await db.insert(schema.emergencyContacts).values(seed);
+      contactsAdded++;
+    }
   }
+
+  log.push(`Emergency contacts: ${contactsAdded} added, ${contactsUpdated} updated`);
 
   // --- Admin user --------------------------------------------------------
   if (!admin) {

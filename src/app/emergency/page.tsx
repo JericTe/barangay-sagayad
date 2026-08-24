@@ -13,9 +13,15 @@ export const metadata: Metadata = {
 
 // Shown only when barangay staff haven't added a contact for this role yet —
 // never a substitute for verified numbers, just a reminder of what's missing.
-// Only "Ambulance" is expected to actually show here after seeding — see
-// scripts/seed.ts for why it's left unseeded.
-const EXPECTED_ROLES = ["Police (PNP)", "Fire (BFP)", "Ambulance", "Nearest Hospital"];
+const EXPECTED_ROLES = ["Ambulance"];
+
+function splitPhones(phone: string | null) {
+  if (!phone) return [];
+  return phone
+    .split(",")
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
 
 export default async function EmergencyPage() {
   const [settings, contacts] = await Promise.all([
@@ -46,15 +52,26 @@ export default async function EmergencyPage() {
       )}
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2">
-        {contacts.map((c) => (
-          <Card key={c.id} className="flex items-center justify-between gap-3">
-            <div>
+        {contacts.map((c) => {
+          const phones = splitPhones(c.phone);
+          return (
+            <Card key={c.id}>
               <p className="font-semibold text-brand-900">{c.label}</p>
               {c.notes ? <p className="text-xs text-ink-soft">{c.notes}</p> : null}
-            </div>
-            {c.phone ? <PhoneLink phone={c.phone} big /> : <ToBeUpdated />}
-          </Card>
-        ))}
+              {phones.length > 0 ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {phones.map((p) => (
+                    <PhoneLink key={p} phone={p} big />
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-3">
+                  <ToBeUpdated />
+                </div>
+              )}
+            </Card>
+          );
+        })}
 
         {missingRoles.map((role) => (
           <Card key={role} className="flex items-center justify-between border-dashed">
