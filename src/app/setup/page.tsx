@@ -10,8 +10,9 @@ export default function SetupPage() {
       <Card className="w-full">
         <p className="font-display text-xl font-bold text-brand-900">Barangay Sagayad Setup</p>
         <p className="mt-1 text-sm text-ink-soft">
-          One-time setup: loads officials, services, and emergency contacts, and creates your
-          first admin login. Safe to run more than once — it won&apos;t duplicate anything.
+          One-time setup: creates the database tables if needed, loads officials, services, and
+          emergency contacts, and creates your first admin login. Safe to run more than once —
+          it won&apos;t duplicate anything.
         </p>
         <div className="mt-6">
           <SetupForm />

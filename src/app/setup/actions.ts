@@ -1,6 +1,7 @@
 "use server";
 
 import { getDb } from "@/lib/db";
+import { initSchema } from "@/lib/db/init-schema";
 import { seedDatabase } from "@/lib/db/seed-logic";
 
 export type SetupState = {
@@ -32,8 +33,9 @@ export async function runSetupAction(_prevState: SetupState, formData: FormData)
 
   try {
     const db = getDb();
-    const log = await seedDatabase(db, { email: adminEmail, password: adminPassword });
-    return { success: true, log };
+    const schemaLog = await initSchema(db);
+    const seedLog = await seedDatabase(db, { email: adminEmail, password: adminPassword });
+    return { success: true, log: [...schemaLog, ...seedLog] };
   } catch (err) {
     return {
       error:
