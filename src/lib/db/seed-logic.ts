@@ -45,7 +45,23 @@ export async function seedDatabase(
     });
     log.push("Site settings created");
   } else {
-    log.push("Site settings already present, skipped");
+    // Upsert only the fields seeded here — telephone, mobile, office hours,
+    // households, and the emergency banner are deliberately left out of
+    // this object, so if an admin has already filled those in via
+    // Admin → Settings, they're untouched by this update.
+    await db
+      .update(schema.siteSettings)
+      .set({
+        address: "Barangay Hall Sagayad, San Fernando City, La Union, Philippines 2500",
+        email: "theo.dacanay@gmail.com",
+        facebookUrl: "https://www.facebook.com/LGUSAGAYAD",
+        captainFacebookUrl: "https://www.facebook.com/KapTheoDacanay",
+        population: 3164,
+        populationYear: 2020,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.siteSettings.id, existingSettings[0].id));
+    log.push("Site settings updated (address, contact links, population)");
   }
 
   // --- Officials -------------------------------------------------------------
