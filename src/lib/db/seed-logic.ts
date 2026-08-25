@@ -82,11 +82,17 @@ export async function seedDatabase(
   }
 
   // --- Pages (CMS content blocks) -------------------------------------------
-  // Draft only — written to fill the homepage section, not verified as the
-  // Punong Barangay's actual words. Meant to be reviewed and edited by him
-  // (or barangay staff) via Admin before treating it as final. Kept
-  // deliberately generic: no specific policy claims, achievements, or
-  // initiatives that haven't been confirmed.
+  // The opening is still a generic draft — not verified as his actual words.
+  // The "Leadership and Community Projects" part below reflects specific
+  // achievements barangay staff described directly (solar-powered water
+  // system, ordinance enforcement, land titling work) — not independently
+  // web-verified by me, same trust level as the officials roster and
+  // address. The overall phrasing is still mine, so it's still worth his
+  // read-through before treating it as final, even though the facts in it
+  // came from the barangay, not invented.
+  //
+  // Upserted by slug (not insert-once) so pushing an edit and re-running
+  // /setup actually updates this instead of silently skipping it.
   const pageSeeds: (typeof schema.pages.$inferInsert)[] = [
     {
       slug: "captains-message",
@@ -100,21 +106,41 @@ export async function seedDatabase(
         'dokumento, pag-uulat ng problema, hanggang sa pananatiling updated sa mga proyekto at ' +
         'gawain ng ating barangay. Ito ay bahagi ng aming patuloy na pagsisikap na maging bukas, ' +
         'mapagkakatiwalaan, at mas malapit sa bawat Sagayadeño.\n\n' +
+        'Bilang inyong Punong Barangay, ipinagmamalaki ko ang ilan sa mga programang aming ' +
+        'isinulong para sa ating barangay: ang aming solar-powered water refilling station, na ' +
+        'nagbibigay ng ligtas na inuming tubig sa daan-daang sambahayan lalo na tuwing tag-init; ' +
+        'ang aking tungkulin bilang deputized enforcer ng mga ordinansa ng lungsod, kasama ang ' +
+        'mga awtoridad, para sa kapayapaan at kaayusan; at ang aming pakikipagtulungan sa antas-' +
+        'probinsya para sa turnover ng land titles at tax declarations para sa mga residente ng ' +
+        'Sagayad Resettlement area.\n\n' +
         'Maraming salamat sa inyong tiwala at patuloy na suporta.\n\n' +
         'Maglingkod nang buong puso,',
     },
   ];
 
-  const currentPages = await db.select({ slug: schema.pages.slug }).from(schema.pages);
-  const existingPageSlugs = new Set(currentPages.map((p) => p.slug));
-  const pagesToInsert = pageSeeds.filter((p) => !existingPageSlugs.has(p.slug));
+  const currentPages = await db
+    .select({ id: schema.pages.id, slug: schema.pages.slug })
+    .from(schema.pages);
+  const pageIdBySlug = new Map(currentPages.map((p) => [p.slug, p.id]));
 
-  if (pagesToInsert.length > 0) {
-    await db.insert(schema.pages).values(pagesToInsert);
-    log.push(`Pages added (${pagesToInsert.length}) — including a DRAFT captain's message for review`);
-  } else {
-    log.push("Pages already present, skipped");
+  let pagesAdded = 0;
+  let pagesUpdated = 0;
+
+  for (const seed of pageSeeds) {
+    const existingId = pageIdBySlug.get(seed.slug);
+    if (existingId) {
+      await db
+        .update(schema.pages)
+        .set({ ...seed, updatedAt: new Date() })
+        .where(eq(schema.pages.id, existingId));
+      pagesUpdated++;
+    } else {
+      await db.insert(schema.pages).values(seed);
+      pagesAdded++;
+    }
   }
+
+  log.push(`Pages: ${pagesAdded} added, ${pagesUpdated} updated (captain's message is still a DRAFT for his review)`);
 
   // --- Services (document types) -------------------------------------------
   const serviceSeeds: (typeof schema.services.$inferInsert)[] = [
